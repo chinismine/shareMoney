@@ -805,7 +805,17 @@
     async function enterGroup(groupId, groupName) {
       currentGroupId = groupId;
       localStorage.setItem('lastShareMoneyGroupId', groupId);
-      setMainLoadingText(`正在進入 ${groupName}...`);
+      
+      // 如果目前已經在群組視圖內，則使用透明遮罩(背景更新)；否則顯示全螢幕載入
+      const isCurrentlyInGroup = document.getElementById('lobbyView').style.display === 'none' && 
+                                document.getElementById('loadingView').style.display === 'none';
+      
+      if (isCurrentlyInGroup) {
+        toggleOverlay(true, "更新資料中...");
+      } else {
+        setMainLoadingText(`正在進入 ${groupName}...`);
+      }
+      
       currentGroupId = groupId;
       currentGroupName = groupName;
       
@@ -910,9 +920,9 @@
 
     // --- 導覽列與畫面切換邏輯 ---
     function switchTab(tab, useCache = false) {
-      // 先隱藏載入畫面
+      // 確保所有載入狀態都被隱藏
       document.getElementById('loadingView').style.display = 'none';
-      document.getElementById('lobbyView').style.display = 'none';
+      toggleOverlay(false);
       
       if (tab === 'form') {
         showExpenseForm();
@@ -920,6 +930,7 @@
       }
       
       currentTab = tab;
+      document.getElementById('lobbyView').style.display = 'none';
       document.getElementById('groupView').style.display = 'none';
       document.getElementById('bottomNav').style.display = 'flex';
       document.getElementById('globalFab').style.display = 'flex';
