@@ -832,24 +832,24 @@
         cachedExpenses = res.expenses;
         
         const urlParams = new URLSearchParams(window.location.search);
-        let activeParams = urlParams;
+        let endpointParams = null;
         if (liff.getContext() && liff.getContext().endpointUrl) {
-           const endpointParams = new URLSearchParams(new URL(liff.getContext().endpointUrl).search);
-           if (Array.from(endpointParams.keys()).length > 0) {
-             activeParams = endpointParams;
-           }
+           endpointParams = new URLSearchParams(new URL(liff.getContext().endpointUrl).search);
         }
         
-        let initView = activeParams.get('view') || 'settlement';
+        // 優先讀取網址列參數，若無則退回檢查 endpointUrl
+        const getParam = (key) => urlParams.get(key) || (endpointParams ? endpointParams.get(key) : null);
+        
+        let initView = getParam('view') || 'settlement';
         switchTab(initView, true);
         
         // --- 第十一階段：URL 參數自動帶入 (捷徑功能) ---
         if (initView === 'form') {
-          const itemParam = activeParams.get('item');
-          const amountParam = activeParams.get('amount');
-          const notesParam = activeParams.get('notes');
-          const payerParam = activeParams.get('payer'); 
-          const currencyParam = activeParams.get('currency'); // 新增：支援指定貨幣
+          const itemParam = getParam('item');
+          const amountParam = getParam('amount');
+          const notesParam = getParam('notes');
+          const payerParam = getParam('payer'); 
+          const currencyParam = getParam('currency'); // 新增：支援指定貨幣
           
           if (itemParam) document.getElementById('item').value = itemParam;
           if (amountParam) document.getElementById('amount').value = amountParam;
