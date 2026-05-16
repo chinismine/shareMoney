@@ -833,23 +833,30 @@
         
         const urlParams = new URLSearchParams(window.location.search);
         let endpointParams = null;
-        if (liff.getContext() && liff.getContext().endpointUrl) {
-           endpointParams = new URLSearchParams(new URL(liff.getContext().endpointUrl).search);
-        }
+        try {
+          if (liff.getContext() && liff.getContext().endpointUrl) {
+            endpointParams = new URLSearchParams(new URL(liff.getContext().endpointUrl).search);
+          }
+        } catch(e) { console.error("解析 endpointUrl 失敗", e); }
         
         // 優先讀取網址列參數，若無則退回檢查 endpointUrl
-        const getParam = (key) => urlParams.get(key) || (endpointParams ? endpointParams.get(key) : null);
+        const getParam = (key) => {
+          const val = urlParams.get(key);
+          if (val !== null) return val;
+          return endpointParams ? endpointParams.get(key) : null;
+        };
         
-        let initView = getParam('view') || 'settlement';
+        const initView = getParam('view') || 'settlement';
         switchTab(initView, true);
         
         // --- 第十一階段：URL 參數自動帶入 (捷徑功能) ---
+        // 必須在 switchTab 之後執行，因為 switchTab('form') 會執行 showExpenseForm 並重置表單
         if (initView === 'form') {
           const itemParam = getParam('item');
           const amountParam = getParam('amount');
           const notesParam = getParam('notes');
           const payerParam = getParam('payer'); 
-          const currencyParam = getParam('currency'); // 新增：支援指定貨幣
+          const currencyParam = getParam('currency');
           
           if (itemParam) document.getElementById('item').value = itemParam;
           if (amountParam) document.getElementById('amount').value = amountParam;
@@ -857,7 +864,6 @@
           
           if (currencyParam) {
             const currencySelect = document.getElementById('currency');
-            // 確保傳入的貨幣代碼轉成大寫，例如 jpy -> JPY
             currencySelect.value = currencyParam.toUpperCase(); 
           }
           
@@ -902,6 +908,11 @@
 
     // --- 導覽列與畫面切換邏輯 ---
     function switchTab(tab, useCache = false) {
+      if (tab === 'form') {
+        showExpenseForm();
+        return;
+      }
+      
       currentTab = tab;
       document.getElementById('loadingView').style.display = 'none';
       document.getElementById('lobbyView').style.display = 'none';
@@ -917,7 +928,7 @@
         document.getElementById('nav-history').classList.remove('active');
         if (useCache) renderSettlementTabsAndData();
         else loadSettlementData();
-      } else {
+      } else if (tab === 'history') {
         document.getElementById('settlementView').style.display = 'none';
         document.getElementById('historyView').style.display = 'block';
         document.getElementById('nav-settlement').classList.remove('active');
