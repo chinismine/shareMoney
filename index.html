@@ -869,6 +869,8 @@
           
           if (payerParam === 'public') {
             document.getElementById('payer').value = '公費';
+          } else if (payerParam === 'me') {
+            document.getElementById('payer').value = currentUser.userId;
           }
           
           // 帶入完成後，清除網址參數，避免重整時重複帶入
@@ -908,16 +910,17 @@
 
     // --- 導覽列與畫面切換邏輯 ---
     function switchTab(tab, useCache = false) {
+      // 先隱藏載入畫面
+      document.getElementById('loadingView').style.display = 'none';
+      document.getElementById('lobbyView').style.display = 'none';
+      
       if (tab === 'form') {
         showExpenseForm();
         return;
       }
       
       currentTab = tab;
-      document.getElementById('loadingView').style.display = 'none';
-      document.getElementById('lobbyView').style.display = 'none';
       document.getElementById('groupView').style.display = 'none';
-      
       document.getElementById('bottomNav').style.display = 'flex';
       document.getElementById('globalFab').style.display = 'flex';
 
