@@ -843,17 +843,24 @@
           const amountParam = activeParams.get('amount');
           const notesParam = activeParams.get('notes');
           const payerParam = activeParams.get('payer'); 
+          const currencyParam = activeParams.get('currency'); // 新增：支援指定貨幣
           
           if (itemParam) document.getElementById('item').value = itemParam;
           if (amountParam) document.getElementById('amount').value = amountParam;
           if (notesParam) document.getElementById('notes').value = notesParam;
+          
+          if (currencyParam) {
+            const currencySelect = document.getElementById('currency');
+            // 確保傳入的貨幣代碼轉成大寫，例如 jpy -> JPY
+            currencySelect.value = currencyParam.toUpperCase(); 
+          }
           
           if (payerParam === 'public') {
             document.getElementById('payer').value = '公費';
           }
           
           // 帶入完成後，清除網址參數，避免重整時重複帶入
-          if (itemParam || amountParam || notesParam || payerParam) {
+          if (itemParam || amountParam || notesParam || payerParam || currencyParam) {
              window.history.replaceState({}, document.title, window.location.pathname);
           }
         }
