@@ -676,7 +676,6 @@
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
       document.getElementById('time').value = now.toISOString().slice(0, 16);
     }
-
     function setMainLoadingText(text) {
       document.getElementById('loadingView').style.display = 'flex';
       document.getElementById('lobbyView').style.display = 'none';
@@ -731,6 +730,11 @@
         if (!inviteGroupId && liff.getContext() && liff.getContext().endpointUrl) {
            const endpointParams = new URLSearchParams(new URL(liff.getContext().endpointUrl).search);
            inviteGroupId = endpointParams.get('groupId');
+        }
+
+        // --- 新增功能：自動記憶最後進入的群組 ---
+        if (!inviteGroupId) {
+          inviteGroupId = localStorage.getItem('lastShareMoneyGroupId');
         }
 
         if (inviteGroupId) {
@@ -799,7 +803,9 @@
 
     // --- 極速載入邏輯 (合併 API) ---
     async function enterGroup(groupId, groupName) {
-      setMainLoadingText("🚀 正在極速載入資料...");
+      currentGroupId = groupId;
+      localStorage.setItem('lastShareMoneyGroupId', groupId);
+      setMainLoadingText(`正在進入 ${groupName}...`);
       currentGroupId = groupId;
       currentGroupName = groupName;
       
